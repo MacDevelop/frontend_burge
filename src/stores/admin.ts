@@ -365,7 +365,7 @@ export const useAdminStore = defineStore('admin', () => {
     const cambio = currentSale.value.montoPagado - total
 
     if (cambio < 0) {
-      alert(`El monto pagado es insuficiente. Faltan $${Math.abs(cambio).toFixed(2)}`)
+      alert(`El monto pagado es insuficiente. Faltan Bs. ${Math.abs(cambio).toFixed(2)}`)
       return false
     }
 
@@ -395,7 +395,7 @@ export const useAdminStore = defineStore('admin', () => {
       })
 
       clearCart()
-      alert(`✅ Venta #${newSale.id} completada. Cambio: $${cambio.toFixed(2)}`)
+      alert(`✅ Venta #${newSale.id} completada. Cambio: Bs. ${cambio.toFixed(2)}`)
       return true
     } catch (err: any) {
       alert(`Error al crear la venta: ${err.message}`)

@@ -29,7 +29,7 @@
           </td>
           <td>{{ product.nombre }}</td>
           <td>{{ getCategoryName(product.idCategoria) }}</td>
-          <td>${{ (Number(product.precioUnitario) || 0).toFixed(2) }}</td>
+          <td>Bs. {{ (Number(product.precioUnitario) || 0).toFixed(2) }}</td>
           <td :class="{ 'low-stock': product.stock < 10 }">{{ product.stock }}</td>
           <td>
             <span :class="['status-badge', product.fechaEliminacion ? 'deleted' : 'active']">

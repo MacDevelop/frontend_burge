@@ -5,7 +5,7 @@
       <div class="stats-cards">
         <div class="stat-card">
           <i class="fas fa-dollar-sign"></i>
-          <div class="stat-number">${{ totalVentasHoy.toFixed(2) }}</div>
+          <div class="stat-number">Bs. {{ totalVentasHoy.toFixed(2) }}</div>
           <div class="stat-label">Ventas hoy</div>
         </div>
         <div class="stat-card">
@@ -34,14 +34,16 @@
           <td>#{{ sale.id }}</td>
           <td>{{ sale.nombreCliente }}</td>
           <td>{{ sale.documento }}</td>
-          <td>${{ sale.totalVenta.toFixed(2) }}</td>
+          <td>Bs. {{ sale.totalVenta.toFixed(2) }}</td>
           <td>{{ getMetodoPagoIcon(sale.metodoPago) }}</td>
           <td>
             <span :class="['status-badge', sale.estado]">{{ sale.estado }}</span>
           </td>
           <td>{{ formatDate(sale.fechaCreacion) }}</td>
           <td>
-            <button @click="viewDetails(sale)" class="btn-view" title="Ver Detalles"><i class="fas fa-eye"></i></button>
+            <button @click="viewDetails(sale)" class="btn-view" title="Ver Detalles">
+              <i class="fas fa-eye"></i>
+            </button>
             <button
               v-if="sale.estado !== 'anulada'"
               @click="cancelSale(sale.id)"
@@ -64,9 +66,9 @@
           <p><strong>Documento:</strong> {{ selectedSale?.documento }}</p>
           <p><strong>Fecha:</strong> {{ formatDate(selectedSale?.fechaCreacion) }}</p>
           <p><strong>Método de pago:</strong> {{ getMetodoPagoIcon(selectedSale?.metodoPago) }}</p>
-          <p><strong>Total:</strong> ${{ selectedSale?.totalVenta.toFixed(2) }}</p>
-          <p><strong>Monto pagado:</strong> ${{ selectedSale?.montoPagado.toFixed(2) }}</p>
-          <p><strong>Cambio:</strong> ${{ selectedSale?.cambio.toFixed(2) }}</p>
+          <p><strong>Total:</strong> Bs. {{ selectedSale?.totalVenta.toFixed(2) }}</p>
+          <p><strong>Monto pagado:</strong> Bs. {{ selectedSale?.montoPagado.toFixed(2) }}</p>
+          <p><strong>Cambio:</strong> Bs. {{ selectedSale?.cambio.toFixed(2) }}</p>
         </div>
         <h4>Productos</h4>
         <table class="detail-table">
@@ -82,8 +84,8 @@
             <tr v-for="detail in saleDetails" :key="detail.id">
               <td>{{ getProductName(detail.idProducto) }}</td>
               <td>{{ detail.cantidad }}</td>
-              <td>${{ (Number(detail.precioUnitario) || 0).toFixed(2) }}</td>
-              <td>${{ (Number(detail.subtotal) || 0).toFixed(2) }}</td>
+              <td>Bs. {{ (Number(detail.precioUnitario) || 0).toFixed(2) }}</td>
+              <td>Bs. {{ (Number(detail.subtotal) || 0).toFixed(2) }}</td>
             </tr>
           </tbody>
         </table>

@@ -28,7 +28,7 @@
           </div>
           <div class="product-info">
             <h4>{{ product.nombre }}</h4>
-            <p class="product-price">${{ Number(product.precioUnitario).toFixed(2) }}</p>
+            <p class="product-price">Bs. {{ Number(product.precioUnitario).toFixed(2) }}</p>
           </div>
         </div>
       </div>
@@ -45,12 +45,12 @@
           </div>
           <div class="cart-item-details">
             <div class="item-name">{{ item.nombre }}</div>
-            <div class="item-price">${{ item.precioUnitario.toFixed(2) }}</div>
+            <div class="item-price">Bs. {{ item.precioUnitario.toFixed(2) }}</div>
             <div class="item-controls">
               <button @click="updateCartQuantity(idx, item.cantidad - 1)" class="qty-btn">-</button>
               <span class="item-qty">{{ item.cantidad }}</span>
               <button @click="updateCartQuantity(idx, item.cantidad + 1)" class="qty-btn">+</button>
-              <span class="item-subtotal">${{ item.subtotal.toFixed(2) }}</span>
+              <span class="item-subtotal">Bs. {{ item.subtotal.toFixed(2) }}</span>
               <button @click="removeFromCart(idx)" class="remove-btn">
                 <i class="fas fa-trash"></i>
               </button>
@@ -66,7 +66,7 @@
 
       <div class="cart-total">
         <span>Total:</span>
-        <strong>${{ adminStore.cartTotal.toFixed(2) }}</strong>
+        <strong>Bs. {{ adminStore.cartTotal.toFixed(2) }}</strong>
       </div>
 
       <div class="customer-info">
@@ -100,7 +100,7 @@
           class="cambio-info"
           :class="{ insufficient: cambio < 0 }"
         >
-          Cambio: ${{ cambio.toFixed(2) }}
+          Cambio: Bs. {{ cambio.toFixed(2) }}
         </div>
       </div>
 
