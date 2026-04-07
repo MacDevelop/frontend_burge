@@ -19,7 +19,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="product in activeProducts" :key="product.id">
+        <tr v-for="product in paginatedProducts" :key="product.id">
           <td>{{ product.id }}</td>
           <td class="product-img-cell">
             <img
@@ -28,7 +28,7 @@
             />
           </td>
           <td>{{ product.nombre }}</td>
-          <td>{{ getCategoryName(product.idCategoria) }}</td>
+          <td>{{ product.categoria?.nombre || 'Sin categoría' }}</td>
           <td>Bs. {{ (Number(product.precioUnitario) || 0).toFixed(2) }}</td>
           <td :class="{ 'low-stock': product.stock < 10 }">{{ product.stock }}</td>
           <td>
@@ -52,6 +52,15 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- Paginación -->
+    <div class="pagination">
+      <button @click="prevPage" :disabled="currentPage === 1" class="btn-page">Anterior</button>
+      <span v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="['page-number', { active: page === currentPage }]">
+        {{ page }}
+      </span>
+      <button @click="nextPage" :disabled="currentPage === totalPages" class="btn-page">Siguiente</button>
+    </div>
 
     <!-- Modal -->
     <div v-if="modalOpen" class="modal">
@@ -90,9 +99,9 @@
         </div>
         <div class="form-group">
           <label>Categoría</label>
-          <select v-model="form.idCategoria" class="modal-input">
+          <select v-model="form.idCategoria" :key="editingProduct?.id || 'new'" class="modal-input">
             <option :value="0">Seleccionar categoría</option>
-            <option v-for="cat in activeCategories" :key="cat.id" :value="cat.id">
+            <option v-for="cat in optionsCategories" :key="cat.id" :value="cat.id">
               {{ cat.nombre }}
             </option>
           </select>
@@ -107,14 +116,53 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAdminStore } from '../../stores/admin'
 import type { Product } from '../../types'
 
 const adminStore = useAdminStore()
 
+onMounted(() => {
+  adminStore.fetchProducts()
+  adminStore.fetchCategories()
+})
+
 const activeProducts = computed(() => adminStore.products.filter((p) => !p.fechaEliminacion))
 const activeCategories = computed(() => adminStore.categories.filter((c) => !c.fechaEliminacion))
+
+const currentPage = ref(1)
+const itemsPerPage = ref(5)
+
+const optionsCategories = computed(() => {
+  const active = adminStore.categories.filter(c => !c.fechaEliminacion)
+  if (editingProduct.value && editingProduct.value.idCategoria) {
+    const cat = adminStore.categories.find(c => c.id === editingProduct.value.idCategoria)
+    if (cat && !active.find(a => a.id === cat.id)) {
+      active.push(cat)
+    }
+  }
+  return active
+})
+
+const paginatedProducts = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return activeProducts.value.slice(start, end)
+})
+
+const totalPages = computed(() => Math.ceil(activeProducts.value.length / itemsPerPage.value))
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--
+}
+
+const goToPage = (page: number) => {
+  if (page >= 1 && page <= totalPages.value) currentPage.value = page
+}
 
 const modalOpen = ref(false)
 const editingProduct = ref<Product | null>(null)
@@ -126,11 +174,6 @@ const form = ref({
   urlImagen: '',
   idCategoria: 0,
 })
-
-const getCategoryName = (id: number) => {
-  const cat = adminStore.categories.find((c) => c.id === id)
-  return cat?.nombre || 'Sin categoría'
-}
 
 const openModal = () => {
   editingProduct.value = null
@@ -342,5 +385,40 @@ const closeModal = () => {
     min-width: 90%;
     margin: 1rem;
   }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  gap: 0.5rem;
+}
+
+.btn-page {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-page:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+}
+
+.page-number {
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #2c313a;
+  color: white;
+}
+
+.page-number.active {
+  background: #ff7e05;
+  color: black;
 }
 </style>

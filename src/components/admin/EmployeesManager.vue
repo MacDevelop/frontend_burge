@@ -19,7 +19,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="emp in adminStore.employees" :key="emp.id">
+        <tr v-for="emp in paginatedEmployees" :key="emp.id">
           <td>{{ emp.id }}</td>
           <td>{{ emp.cedulaIdentidad }}</td>
           <td>{{ emp.nombre }} {{ emp.apellidoPaterno }} {{ emp.apellidoMaterno }}</td>
@@ -40,6 +40,15 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- Paginación -->
+    <div class="pagination">
+      <button @click="prevPage" :disabled="currentPage === 1" class="btn-page">Anterior</button>
+      <span v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="['page-number', { active: page === currentPage }]">
+        {{ page }}
+      </span>
+      <button @click="nextPage" :disabled="currentPage === totalPages" class="btn-page">Siguiente</button>
+    </div>
 
     <!-- Modal -->
     <div v-if="modalOpen" class="modal">
@@ -111,11 +120,38 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAdminStore } from '../../stores/admin'
 import type { Employee } from '../../types'
 
 const adminStore = useAdminStore()
+
+onMounted(() => {
+  adminStore.fetchEmployees()
+})
+
+const currentPage = ref(1)
+const itemsPerPage = ref(5)
+
+const paginatedEmployees = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return adminStore.employees.slice(start, end)
+})
+
+const totalPages = computed(() => Math.ceil(adminStore.employees.length / itemsPerPage.value))
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--
+}
+
+const goToPage = (page: number) => {
+  if (page >= 1 && page <= totalPages.value) currentPage.value = page
+}
 
 const modalOpen = ref(false)
 const editingEmployee = ref<Employee | null>(null)
@@ -151,7 +187,7 @@ const openModal = () => {
 
 const editEmployee = (employee: Employee) => {
   editingEmployee.value = employee
-  const fechaStr = (employee.fechaNacimiento ? 
+  const fechaStr = (employee.fechaNacimiento ?
     new Date(employee.fechaNacimiento).toISOString().split('T')[0] : '') || ''
   form.value = { ...employee, fechaNacimiento: fechaStr }
   modalOpen.value = true
@@ -353,4 +389,37 @@ const closeModal = () => {
     grid-template-columns: 1fr;
   }
 }
-</style>
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  gap: 0.5rem;
+}
+
+.btn-page {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-page:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+}
+
+.page-number {
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #2c313a;
+  color: white;
+}
+
+.page-number.active {
+  background: #ff7e05;
+  color: black;
+}</style>

@@ -18,7 +18,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="user in activeUsers" :key="user.id">
+        <tr v-for="user in paginatedUsers" :key="user.id">
           <td>{{ user.id }}</td>
           <td>{{ user.nombreUsuario }}</td>
           <td>{{ user.email }}</td>
@@ -38,6 +38,15 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- Paginación -->
+    <div class="pagination">
+      <button @click="prevPage" :disabled="currentPage === 1" class="btn-page">Anterior</button>
+      <span v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="['page-number', { active: page === currentPage }]">
+        {{ page }}
+      </span>
+      <button @click="nextPage" :disabled="currentPage === totalPages" class="btn-page">Siguiente</button>
+    </div>
 
     <!-- Modal -->
     <div v-if="modalOpen" class="modal">
@@ -83,15 +92,44 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAdminStore } from '../../stores/admin'
 import type { User } from '../../types'
 
 const adminStore = useAdminStore()
 
+onMounted(() => {
+  adminStore.fetchUsers()
+  adminStore.fetchRoles()
+  adminStore.fetchEmployees()
+})
+
+const currentPage = ref(1)
+const itemsPerPage = ref(5)
+
 const activeUsers = computed(() => adminStore.users.filter((u) => !u.fechaEliminacion))
 const activeRoles = computed(() => adminStore.roles.filter((r) => !r.fechaEliminacion))
-const activeEmployees = computed(() => adminStore.employees.filter((e) => e.activo))
+const activeEmployees = computed(() => adminStore.employees.filter((e) => !e.fechaEliminacion))
+
+const paginatedUsers = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return activeUsers.value.slice(start, end)
+})
+
+const totalPages = computed(() => Math.ceil(activeUsers.value.length / itemsPerPage.value))
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--
+}
+
+const goToPage = (page: number) => {
+  if (page >= 1 && page <= totalPages.value) currentPage.value = page
+}
 
 const modalOpen = ref(false)
 const editingUser = ref<User | null>(null)
@@ -301,5 +339,51 @@ const closeModal = () => {
 
 .form-group {
   margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .admin-table {
+    font-size: 0.8rem;
+  }
+
+  .modal-content {
+    min-width: 90%;
+    margin: 1rem;
+  }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  gap: 0.5rem;
+}
+
+.btn-page {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-page:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+}
+
+.page-number {
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #2c313a;
+  color: white;
+}
+
+.page-number.active {
+  background: #ff7e05;
+  color: black;
 }
 </style>

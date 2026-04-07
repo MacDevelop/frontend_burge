@@ -30,7 +30,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="sale in adminStore.sales" :key="sale.id">
+        <tr v-for="sale in paginatedSales" :key="sale.id">
           <td>#{{ sale.id }}</td>
           <td>{{ sale.nombreCliente }}</td>
           <td>{{ sale.documento }}</td>
@@ -57,6 +57,15 @@
       </tbody>
     </table>
 
+    <!-- Paginación -->
+    <div class="pagination">
+      <button @click="prevPage" :disabled="currentPage === 1" class="btn-page">Anterior</button>
+      <span v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="['page-number', { active: page === currentPage }]">
+        {{ page }}
+      </span>
+      <button @click="nextPage" :disabled="currentPage === totalPages" class="btn-page">Siguiente</button>
+    </div>
+
     <!-- Modal de detalles -->
     <div v-if="modalOpen" class="modal">
       <div class="modal-content modal-large">
@@ -82,7 +91,7 @@
           </thead>
           <tbody>
             <tr v-for="detail in saleDetails" :key="detail.id">
-              <td>{{ getProductName(detail.idProducto) }}</td>
+              <td>{{ detail.producto?.nombre || 'Producto desconocido' }}</td>
               <td>{{ detail.cantidad }}</td>
               <td>Bs. {{ (Number(detail.precioUnitario) || 0).toFixed(2) }}</td>
               <td>Bs. {{ (Number(detail.subtotal) || 0).toFixed(2) }}</td>
@@ -98,11 +107,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAdminStore } from '../../stores/admin'
 import type { Sale, SaleDetail } from '../../types'
 
 const adminStore = useAdminStore()
+
+onMounted(() => {
+  adminStore.fetchSales()
+  adminStore.fetchProducts()
+})
+
+const currentPage = ref(1)
+const itemsPerPage = ref(5)
 
 const modalOpen = ref(false)
 const selectedSale = ref<Sale | null>(null)
@@ -119,6 +136,26 @@ const totalVentasHoy = computed(() => {
   return ventasHoy.value.reduce((sum, sale) => sum + sale.totalVenta, 0)
 })
 
+const paginatedSales = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return adminStore.sales.slice(start, end)
+})
+
+const totalPages = computed(() => Math.ceil(adminStore.sales.length / itemsPerPage.value))
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--
+}
+
+const goToPage = (page: number) => {
+  if (page >= 1 && page <= totalPages.value) currentPage.value = page
+}
+
 const getMetodoPagoIcon = (metodo: string | undefined) => {
   if (!metodo) return ''
   const icons: Record<string, string> = {
@@ -128,11 +165,6 @@ const getMetodoPagoIcon = (metodo: string | undefined) => {
     qr: '📱 QR',
   }
   return icons[metodo] || metodo
-}
-
-const getProductName = (productId: number) => {
-  const product = adminStore.products.find((p) => p.id === productId)
-  return product?.nombre || 'Producto desconocido'
 }
 
 const formatDate = (date: Date | undefined) => {
@@ -344,5 +376,40 @@ const closeModal = () => {
   .sale-info {
     grid-template-columns: 1fr;
   }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  gap: 0.5rem;
+}
+
+.btn-page {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-page:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+}
+
+.page-number {
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #2c313a;
+  color: white;
+}
+
+.page-number.active {
+  background: #ff7e05;
+  color: black;
 }
 </style>
