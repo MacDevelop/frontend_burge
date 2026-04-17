@@ -12,6 +12,9 @@
         <button :class="{ active: activeTab === 'sales' }" @click="activeTab = 'sales'">
           <i class="fas fa-chart-line"></i> Ventas
         </button>
+        <button :class="{ active: activeTab === 'reportes' }" @click="activeTab = 'reportes'">
+          <i class="fas fa-file-alt"></i> Reportes
+        </button>
         <button :class="{ active: activeTab === 'products' }" @click="activeTab = 'products'">
           <i class="fas fa-hamburger"></i> Productos
         </button>
@@ -36,6 +39,7 @@
 
       <!-- Ventas -->
       <SalesManager v-if="activeTab === 'sales'" />
+      <ReportesManager v-if="activeTab === 'reportes'" />
 
       <!-- Productos -->
       <ProductsManager v-if="activeTab === 'products'" />
@@ -64,6 +68,7 @@ import CategoriesManager from '../components/admin/CategoriesManager.vue'
 import EmployeesManager from '../components/admin/EmployeesManager.vue'
 import UsersManager from '../components/admin/UsersManager.vue'
 import RolesManager from '../components/admin/RolesManager.vue'
+import ReportesManager from '../components/admin/ReportesManager.vue'
 
 const activeTab = ref('pos')
 </script>

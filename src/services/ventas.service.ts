@@ -1,5 +1,5 @@
 import api from './api'
-import type { Sale, SaleDetail } from '../types'
+import type { Sale, SaleDetail, SalesReport } from '../types'
 
 export interface CreateSaleDto {
   idUsuario: number
@@ -27,6 +27,11 @@ export const ventasService = {
 
   async getDetalles(id: number): Promise<SaleDetail[]> {
     const response = await api.get(`/ventas/${id}/detalles`)
+    return response.data
+  },
+
+  async getReports(): Promise<SalesReport> {
+    const response = await api.get('/ventas/reportes')
     return response.data
   },
 

@@ -81,6 +81,22 @@ export interface Sale {
   documento: string
   idUsuario: number
   usuario?: User
+  ventadetalles?: SaleDetail[]
+}
+
+export interface SalesReportSummary {
+  totalIngresos: number
+  ventasRealizadas: number
+  hamburguesaMasVendida: {
+    nombre: string
+    cantidadVendida: number
+    totalVendido: number
+  }
+}
+
+export interface SalesReport {
+  diario: SalesReportSummary
+  mensual: SalesReportSummary
 }
 
 // ============= DETALLE_VENTAS =============

@@ -93,10 +93,20 @@
           <label>Stock</label>
           <input type="number" v-model="form.stock" placeholder="Stock" class="modal-input" />
         </div>
-        <div class="form-group">
-          <label>URL de la imagen</label>
-          <input v-model="form.urlImagen" placeholder="URL de la imagen" class="modal-input" />
-        </div>
+        <!-- Subir imagen (único input visible) -->
+      <div class="flex items-center gap-4 mb-4">
+        <label for="imagenFile" class="font-semibold w-3">Imagen</label>
+        <input id="imagenFile" type="file" accept="image/*" @change="onFileChange" />
+      </div>
+
+      <!-- Previsualización si ya hay URL (creación o edición) -->
+      <div v-if="form.urlImagen" class="mb-4">
+        <img
+          :src="form.urlImagen"
+          alt="imagen producto"
+          style="width: 120px; border-radius: 6px"
+        />
+      </div>
         <div class="form-group">
           <label>Categoría</label>
           <select v-model="form.idCategoria" :key="editingProduct?.id || 'new'" class="modal-input">
@@ -118,6 +128,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useAdminStore } from '../../stores/admin'
+import api from '../../services/api'
 import type { Product } from '../../types'
 
 const adminStore = useAdminStore()
@@ -190,17 +201,26 @@ const openModal = () => {
 
 const editProduct = (product: Product) => {
   editingProduct.value = product
-  form.value = { ...product }
+  form.value = {
+    ...product,
+    idCategoria: product.idCategoria ?? product.categoria?.id ?? 0,
+    urlImagen: product.urlImagen || '',
+  }
   modalOpen.value = true
 }
 
-const save = () => {
-  if (editingProduct.value) {
-    adminStore.updateProduct(editingProduct.value.id, form.value)
-  } else {
-    adminStore.addProduct(form.value as any)
+const save = async () => {
+  try {
+    if (editingProduct.value) {
+      await adminStore.updateProduct(editingProduct.value.id, form.value)
+    } else {
+      await adminStore.addProduct(form.value as any)
+    }
+    closeModal()
+  } catch (err: any) {
+    console.error('Error guardando producto:', err)
+    alert(err?.response?.data?.message || err?.message || 'No se pudo guardar el producto')
   }
-  closeModal()
 }
 
 const deleteProduct = (id: number) => {
@@ -212,6 +232,37 @@ const deleteProduct = (id: number) => {
 const closeModal = () => {
   modalOpen.value = false
 }
+
+async function onFileChange(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+
+  console.log('Archivo seleccionado:', file)
+
+  if (!file) return
+
+  const fd = new FormData()
+  fd.append('file', file)
+
+  try {
+    const { data } = await api.post('/uploads', fd, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+
+    console.log('Respuesta del backend:', data)
+
+    if (data?.url) {
+      form.value.urlImagen = data.url
+    }
+  } catch (err: any) {
+    console.error('Error al subir imagen:', err)
+    console.error('Detalles:', err.response?.data)
+    alert('No se pudo subir la imagen')
+  }
+}
+
 </script>
 
 <style scoped>

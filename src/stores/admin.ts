@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { Category, Product, Employee, User, Role, Sale, SaleDetail, CartItem } from '../types'
+import type { Category, Product, Employee, User, Role, Sale, SaleDetail, SalesReport, CartItem } from '../types'
 import { categoriasService } from '../services/categorias.service'
 import { productosService } from '../services/productos.service'
 import { empleadosService } from '../services/empleados.service'
@@ -17,6 +17,7 @@ export const useAdminStore = defineStore('admin', () => {
   const roles = ref<Role[]>([])
   const sales = ref<Sale[]>([])
   const saleDetails = ref<SaleDetail[]>([])
+  const reports = ref<SalesReport | null>(null)
 
   // Carrito de compras (POS)
   const cart = ref<CartItem[]>([])
@@ -298,6 +299,17 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
+  const fetchSalesReport = async () => {
+    loading.value = true
+    try {
+      reports.value = await ventasService.getReports()
+    } catch (err: any) {
+      error.value = err.message
+    } finally {
+      loading.value = false
+    }
+  }
+
   // ============= POS (Carrito y Ventas) =============
   const addToCart = (product: Product, cantidad: number = 1) => {
     const existing = cart.value.find((item) => item.productId === product.id)
@@ -426,6 +438,7 @@ export const useAdminStore = defineStore('admin', () => {
       fetchUsers(),
       fetchRoles(),
       fetchSales(),
+      fetchSalesReport(),
     ])
   }
 
@@ -438,6 +451,7 @@ export const useAdminStore = defineStore('admin', () => {
     roles,
     sales,
     saleDetails,
+    reports,
     cart,
     currentSale,
     cartTotal,
@@ -480,6 +494,7 @@ export const useAdminStore = defineStore('admin', () => {
     // CRUD Ventas
     fetchSales,
     fetchSaleDetails,
+    fetchSalesReport,
     cancelSale,
 
     // POS
