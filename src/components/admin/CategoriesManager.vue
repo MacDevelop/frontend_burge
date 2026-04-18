@@ -28,7 +28,7 @@
             </span>
           </td>
           <td>
-            <button @click="editCategory(cat)" class="btn-edit" title="Editar"><i class="fas fa-eye"></i></button>
+            <button @click="editCategory(cat)" class="btn-edit" title="Editar"><i class="fas fa-edit"></i></button>
             <button
               v-if="!cat.fechaEliminacion"
               @click="deleteCategory(cat.id)"

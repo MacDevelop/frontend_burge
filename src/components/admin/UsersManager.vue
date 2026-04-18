@@ -30,7 +30,7 @@
             </span>
           </td>
           <td>
-            <button @click="editUser(user)" class="btn-edit" title="Editar"><i class="fas fa-eye"></i></button>
+            <button @click="editUser(user)" class="btn-edit" title="Editar"><i class="fas fa-edit"></i></button>
             <button v-if="!user.fechaEliminacion" @click="deleteUser(user.id)" class="btn-delete" title="Eliminar">
               <i class="fas fa-trash"></i>
             </button>

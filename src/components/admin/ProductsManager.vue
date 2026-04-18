@@ -8,7 +8,7 @@
     <table class="admin-table">
       <thead>
         <tr>
-          <th>ID</th>
+          <th>#</th>
           <th>Imagen</th>
           <th>Nombre</th>
           <th>Categoría</th>
@@ -19,8 +19,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="product in paginatedProducts" :key="product.id">
-          <td>{{ product.id }}</td>
+        <tr v-for="(product, index) in paginatedProducts" :key="product.id">
+          <td>{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
           <td class="product-img-cell">
             <img
               :src="product.urlImagen || 'https://placehold.co/50x50/2b2b2b/FF7E05?text=🍔'"
@@ -38,7 +38,15 @@
           </td>
           <td>
             <button @click="editProduct(product)" class="btn-edit" title="Editar">
-              <i class="fas fa-eye"></i>
+              <i class="fas fa-edit"></i>
+            </button>
+            <button
+              v-if="!product.fechaEliminacion"
+              @click="openStockModal(product)"
+              class="btn-stock"
+              title="Actualizar Stock"
+            >
+              <i class="fas fa-boxes"></i>
             </button>
             <button
               v-if="!product.fechaEliminacion"
@@ -63,7 +71,7 @@
     </div>
 
     <!-- Modal -->
-    <div v-if="modalOpen" class="modal">
+    <div v-if="modalOpen" :key="editingProduct?.id || 'new'" class="modal">
       <div class="modal-content">
         <h3>{{ editingProduct ? 'Editar Producto' : 'Nuevo Producto' }}</h3>
         <div class="form-group">
@@ -96,7 +104,7 @@
         <!-- Subir imagen (único input visible) -->
       <div class="flex items-center gap-4 mb-4">
         <label for="imagenFile" class="font-semibold w-3">Imagen</label>
-        <input id="imagenFile" type="file" accept="image/*" @change="onFileChange" />
+        <input ref="fileInputRef" id="imagenFile" type="file" accept="image/*" @change="onFileChange" />
       </div>
 
       <!-- Previsualización si ya hay URL (creación o edición) -->
@@ -119,6 +127,27 @@
         <div class="modal-buttons">
           <button @click="save" class="btn-save">Guardar</button>
           <button @click="closeModal" class="btn-cancel-modal">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Actualizar Stock -->
+    <div v-if="stockModalOpen" class="modal">
+      <div class="modal-content">
+        <h3>Actualizar Stock - {{ editingStockProduct?.nombre }}</h3>
+        <div class="form-group">
+          <label>Stock Actual: {{ editingStockProduct?.stock }}</label>
+          <input
+            type="number"
+            v-model.number="newStock"
+            placeholder="Nuevo stock"
+            class="modal-input"
+            min="0"
+          />
+        </div>
+        <div class="modal-buttons">
+          <button @click="saveStock" class="btn-save">Actualizar</button>
+          <button @click="closeStockModal" class="btn-cancel-modal">Cancelar</button>
         </div>
       </div>
     </div>
@@ -176,7 +205,11 @@ const goToPage = (page: number) => {
 }
 
 const modalOpen = ref(false)
+const stockModalOpen = ref(false)
 const editingProduct = ref<Product | null>(null)
+const editingStockProduct = ref<Product | null>(null)
+const fileInputRef = ref<HTMLInputElement | null>(null)
+const newStock = ref(0)
 const form = ref({
   nombre: '',
   descripcion: '',
@@ -229,8 +262,38 @@ const deleteProduct = (id: number) => {
   }
 }
 
+const openStockModal = (product: Product) => {
+  editingStockProduct.value = product
+  newStock.value = product.stock
+  stockModalOpen.value = true
+}
+
+const closeStockModal = () => {
+  stockModalOpen.value = false
+  editingStockProduct.value = null
+  newStock.value = 0
+}
+
+const saveStock = async () => {
+  if (!editingStockProduct.value) return
+
+  try {
+    await adminStore.updateProduct(editingStockProduct.value.id, {
+      stock: newStock.value,
+    })
+    closeStockModal()
+  } catch (err: any) {
+    console.error('Error actualizando stock:', err)
+    alert(err?.response?.data?.message || err?.message || 'No se pudo actualizar el stock')
+  }
+}
+
 const closeModal = () => {
   modalOpen.value = false
+  // Limpiar el input de file
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ''
+  }
 }
 
 async function onFileChange(e: Event) {
@@ -256,10 +319,19 @@ async function onFileChange(e: Event) {
     if (data?.url) {
       form.value.urlImagen = data.url
     }
+
+    // Limpiar el input de file después de la carga
+    if (fileInputRef.value) {
+      fileInputRef.value.value = ''
+    }
   } catch (err: any) {
     console.error('Error al subir imagen:', err)
     console.error('Detalles:', err.response?.data)
     alert('No se pudo subir la imagen')
+    // Limpiar el input incluso en caso de error
+    if (fileInputRef.value) {
+      fileInputRef.value.value = ''
+    }
   }
 }
 
@@ -322,6 +394,16 @@ async function onFileChange(e: Event) {
 
 .btn-edit {
   background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 0.3rem;
+}
+
+.btn-stock {
+  background: #f59e0b;
   color: white;
   border: none;
   padding: 0.3rem 0.6rem;

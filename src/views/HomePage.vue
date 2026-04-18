@@ -79,9 +79,9 @@
               <p>{{ product.descripcion }}</p>
               <div class="price-order">
                 <span class="price">Bs{{ (Number(product.precioUnitario) || 0).toFixed(2) }}</span>
-                <button class="add-to-cart" @click="addToCart(product)">
+                <!--<button class="add-to-cart" @click="addToCart(product)">
                   <i class="fas fa-shopping-cart"></i> Pedir
-                </button>
+                </button>-->
               </div>
             </div>
           </div>
@@ -370,9 +370,9 @@ const submitContact = () => {
   contactForm.value = { name: '', email: '', phone: '', message: '' }
 }
 
-const addToCart = (product: Product) => {
+/*const addToCart = (product: Product) => {
   alert(`🍔 ${product.nombre} agregado al carrito (demo)`)
-}
+}*/
 
 // Scroll suave
 const scrollToMenu = () => {
@@ -815,7 +815,7 @@ const scrollToContact = () => {
   .contact-grid {
     flex-direction: column;
   }
-  
+
   .container {
     padding: 0 15px;
   }

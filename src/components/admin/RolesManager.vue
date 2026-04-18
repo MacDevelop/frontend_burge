@@ -26,7 +26,7 @@
             </span>
           </td>
           <td>
-            <button @click="editRole(role)" class="btn-edit" title="Editar"><i class="fas fa-eye"></i></button>
+            <button @click="editRole(role)" class="btn-edit" title="Editar"><i class="fas fa-edit"></i></button>
             <button v-if="!role.fechaEliminacion" @click="deleteRole(role.id)" class="btn-delete" title="Eliminar">
               <i class="fas fa-trash"></i>
             </button>

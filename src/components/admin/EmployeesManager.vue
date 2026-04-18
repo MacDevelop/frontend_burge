@@ -32,7 +32,7 @@
             </span>
           </td>
           <td>
-            <button @click="editEmployee(emp)" class="btn-edit" title="Editar"><i class="fas fa-eye"></i></button>
+            <button @click="editEmployee(emp)" class="btn-edit" title="Editar"><i class="fas fa-edit"></i></button>
             <button @click="toggleStatus(emp.id, emp.activo)" class="btn-toggle" :title="emp.activo ? 'Desactivar' : 'Activar'">
               <i :class="emp.activo ? 'fas fa-ban' : 'fas fa-check-circle'"></i>
             </button>
