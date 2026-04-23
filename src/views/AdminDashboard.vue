@@ -6,14 +6,14 @@
         <h3>BurgerHeim Admin</h3>
       </div>
       <nav>
+        <button :class="{ active: activeTab === 'reportes' }" @click="activeTab = 'reportes'">
+          <i class="fas fa-file-alt"></i> Reportes
+        </button>
         <button :class="{ active: activeTab === 'pos' }" @click="activeTab = 'pos'">
           <i class="fas fa-shopping-cart"></i> Punto de Venta
         </button>
         <button :class="{ active: activeTab === 'sales' }" @click="activeTab = 'sales'">
           <i class="fas fa-chart-line"></i> Ventas
-        </button>
-        <button :class="{ active: activeTab === 'reportes' }" @click="activeTab = 'reportes'">
-          <i class="fas fa-file-alt"></i> Reportes
         </button>
         <button :class="{ active: activeTab === 'products' }" @click="activeTab = 'products'">
           <i class="fas fa-hamburger"></i> Productos
@@ -70,7 +70,7 @@ import UsersManager from '../components/admin/UsersManager.vue'
 import RolesManager from '../components/admin/RolesManager.vue'
 import ReportesManager from '../components/admin/ReportesManager.vue'
 
-const activeTab = ref('pos')
+const activeTab = ref('reportes')
 </script>
 
 <style scoped>

@@ -66,6 +66,7 @@
           <li><strong>Hamburguesa líder:</strong> {{ reportes.diario.hamburguesaMasVendida.nombre }}</li>
           <li><strong>Cantidad vendida:</strong> {{ reportes.diario.hamburguesaMasVendida.cantidadVendida }}</li>
         </ul>
+        <button class="btn-detail">Ver a detalle</button>
       </div>
       <div class="detail-panel">
         <h3>Resumen mensual</h3>
@@ -75,6 +76,7 @@
           <li><strong>Hamburguesa líder:</strong> {{ reportes.mensual.hamburguesaMasVendida.nombre }}</li>
           <li><strong>Cantidad vendida:</strong> {{ reportes.mensual.hamburguesaMasVendida.cantidadVendida }}</li>
         </ul>
+        <button class="btn-detail">Ver a detalle</button>
       </div>
     </div>
   </div>
@@ -130,6 +132,17 @@ onMounted(() => {
   border-radius: 0.85rem;
   cursor: pointer;
   font-weight: bold;
+}
+
+.btn-detail {
+  background: #ff7e05;
+  border: none;
+  color: #1a1a1a;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 1rem;
 }
 
 .empty-state {
