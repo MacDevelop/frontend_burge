@@ -84,8 +84,6 @@
         />
         <select v-model="adminStore.currentSale.metodoPago" class="customer-input">
           <option value="efectivo">💵 Efectivo</option>
-          <option value="tarjeta">💳 Tarjeta</option>
-          <option value="transferencia">🏦 Transferencia</option>
           <option value="qr">📱 QR</option>
         </select>
         <input

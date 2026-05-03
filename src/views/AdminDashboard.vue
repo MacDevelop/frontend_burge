@@ -18,49 +18,57 @@
         <button :class="{ active: activeTab === 'products' }" @click="activeTab = 'products'">
           <i class="fas fa-hamburger"></i> Productos
         </button>
-        <button :class="{ active: activeTab === 'categories' }" @click="activeTab = 'categories'">
+        <button v-if="isAdmin" :class="{ active: activeTab === 'categories' }" @click="activeTab = 'categories'">
           <i class="fas fa-tags"></i> Categorías
         </button>
-        <button :class="{ active: activeTab === 'employees' }" @click="activeTab = 'employees'">
+        <button v-if="isAdmin" :class="{ active: activeTab === 'employees' }" @click="activeTab = 'employees'">
           <i class="fas fa-users"></i> Empleados
         </button>
-        <button :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'">
+        <button v-if="isAdmin" :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'">
           <i class="fas fa-user-shield"></i> Usuarios
         </button>
-        <button :class="{ active: activeTab === 'roles' }" @click="activeTab = 'roles'">
+        <button v-if="isAdmin" :class="{ active: activeTab === 'roles' }" @click="activeTab = 'roles'">
           <i class="fas fa-key"></i> Roles
         </button>
       </nav>
     </div>
 
     <div class="admin-content">
-      <!-- Punto de Venta -->
-      <PosSystem v-if="activeTab === 'pos'" />
+      <div v-if="!hasValidRole" class="blocked-access">
+        <h2>Acceso no permitido</h2>
+        <p>Tu rol actual no tiene permiso para ingresar al panel administrativo.</p>
+        <p>Solo los roles <strong>Administrador</strong> y <strong>Cajero</strong> pueden acceder.</p>
+      </div>
+      <template v-else>
+        <!-- Punto de Venta -->
+        <PosSystem v-if="activeTab === 'pos'" />
 
-      <!-- Ventas -->
-      <SalesManager v-if="activeTab === 'sales'" />
-      <ReportesManager v-if="activeTab === 'reportes'" />
+        <!-- Ventas -->
+        <SalesManager v-if="activeTab === 'sales'" />
+        <ReportesManager v-if="activeTab === 'reportes'" />
 
-      <!-- Productos -->
-      <ProductsManager v-if="activeTab === 'products'" />
+        <!-- Productos -->
+        <ProductsManager v-if="activeTab === 'products'" />
 
-      <!-- Categorías -->
-      <CategoriesManager v-if="activeTab === 'categories'" />
+        <!-- Categorías -->
+        <CategoriesManager v-if="activeTab === 'categories'" />
 
-      <!-- Empleados -->
-      <EmployeesManager v-if="activeTab === 'employees'" />
+        <!-- Empleados -->
+        <EmployeesManager v-if="activeTab === 'employees'" />
 
-      <!-- Usuarios -->
-      <UsersManager v-if="activeTab === 'users'" />
+        <!-- Usuarios -->
+        <UsersManager v-if="activeTab === 'users'" />
 
-      <!-- Roles -->
-      <RolesManager v-if="activeTab === 'roles'" />
+        <!-- Roles -->
+        <RolesManager v-if="activeTab === 'roles'" />
+      </template>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useAuthStore } from '../stores/auth'
 import PosSystem from '../components/admin/PosSystem.vue'
 import SalesManager from '../components/admin/SalesManager.vue'
 import ProductsManager from '../components/admin/ProductsManager.vue'
@@ -70,7 +78,23 @@ import UsersManager from '../components/admin/UsersManager.vue'
 import RolesManager from '../components/admin/RolesManager.vue'
 import ReportesManager from '../components/admin/ReportesManager.vue'
 
-const activeTab = ref('reportes')
+const authStore = useAuthStore()
+
+const isAdmin = computed(() => authStore.isAdmin)
+const isCajero = computed(() => authStore.isCajero)
+const hasValidRole = computed(() => authStore.hasValidRole)
+
+const availableTabs = computed(() => {
+  if (isAdmin.value) {
+    return ['reportes', 'pos', 'sales', 'products', 'categories', 'employees', 'users', 'roles']
+  }
+  if (isCajero.value) {
+    return ['reportes', 'pos', 'sales', 'products']
+  }
+  return []
+})
+
+const activeTab = ref(availableTabs.value[0] || 'reportes')
 </script>
 
 <style scoped>
@@ -139,6 +163,31 @@ const activeTab = ref('reportes')
   flex: 1;
   padding: 1.5rem;
   overflow-y: auto;
+}
+
+.blocked-access {
+  background: #1e2128;
+  border: 2px solid #dc2626;
+  border-radius: 1rem;
+  padding: 3rem;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.blocked-access h2 {
+  color: #dc2626;
+  margin-bottom: 1rem;
+  font-size: 2rem;
+}
+
+.blocked-access p {
+  color: #f5ede8;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.blocked-access strong {
+  color: #ff7e05;
 }
 
 @media (max-width: 768px) {

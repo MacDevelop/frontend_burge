@@ -1,11 +1,18 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { authService } from '../services/auth.service'
 
 export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(false)
   const user = ref<any>(null)
   const token = ref<string | null>(null)
+
+  const userRole = computed(() => user.value?.rol?.nombre?.toString() || '')
+  const isAdmin = computed(() => userRole.value.toLowerCase() === 'administrador')
+  const isCajero = computed(() => userRole.value.toLowerCase() === 'cajero')
+  const hasValidRole = computed(
+    () => isAdmin.value || isCajero.value,
+  )
 
   const login = async (identifier: string, password: string) => {
     try {
@@ -36,5 +43,16 @@ export const useAuthStore = defineStore('auth', () => {
 
   checkAuth()
 
-  return { isAuthenticated, user, token, login, logout, checkAuth }
+  return {
+    isAuthenticated,
+    user,
+    token,
+    userRole,
+    isAdmin,
+    isCajero,
+    hasValidRole,
+    login,
+    logout,
+    checkAuth,
+  }
 })

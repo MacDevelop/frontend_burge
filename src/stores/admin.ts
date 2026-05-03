@@ -118,6 +118,18 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
+  const updateProductStock = async (id: number, stock: number) => {
+    try {
+      const updated = await productosService.updateStock(id, stock)
+      const index = products.value.findIndex((p) => p.id === id)
+      if (index !== -1) products.value[index] = updated
+      return updated
+    } catch (err: any) {
+      error.value = err.message
+      throw err
+    }
+  }
+
   const deleteProduct = async (id: number) => {
     try {
       await productosService.delete(id)
@@ -471,6 +483,7 @@ export const useAdminStore = defineStore('admin', () => {
     fetchProducts,
     addProduct,
     updateProduct,
+    updateProductStock,
     deleteProduct,
 
     // CRUD Empleados

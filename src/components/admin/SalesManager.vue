@@ -45,7 +45,7 @@
               <i class="fas fa-eye"></i>
             </button>
             <button
-              v-if="sale.estado !== 'anulada'"
+              v-if="sale.estado !== 'anulada' && isAdmin"
               @click="cancelSale(sale.id)"
               class="btn-cancel"
               title="Anular Venta"
@@ -109,9 +109,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useAdminStore } from '../../stores/admin'
+import { useAuthStore } from '../../stores/auth'
 import type { Sale, SaleDetail } from '../../types'
 
 const adminStore = useAdminStore()
+const authStore = useAuthStore()
+
+const isAdmin = computed(() => authStore.isAdmin)
 
 onMounted(() => {
   adminStore.fetchSales()

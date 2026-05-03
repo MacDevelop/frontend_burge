@@ -2,7 +2,7 @@
   <div class="manager-container">
     <div class="section-header">
       <h2><i class="fas fa-hamburger"></i> Productos</h2>
-      <button @click="openModal" class="btn-add"><i class="fas fa-plus"></i> Nuevo Producto</button>
+      <button v-if="canManageProducts" @click="openModal" class="btn-add"><i class="fas fa-plus"></i> Nuevo Producto</button>
     </div>
 
     <table class="admin-table">
@@ -37,11 +37,11 @@
             </span>
           </td>
           <td>
-            <button @click="editProduct(product)" class="btn-edit" title="Editar">
+            <button v-if="canManageProducts" @click="editProduct(product)" class="btn-edit" title="Editar">
               <i class="fas fa-edit"></i>
             </button>
             <button
-              v-if="!product.fechaEliminacion"
+              v-if="!product.fechaEliminacion && canUpdateStock"
               @click="openStockModal(product)"
               class="btn-stock"
               title="Actualizar Stock"
@@ -49,7 +49,7 @@
               <i class="fas fa-boxes"></i>
             </button>
             <button
-              v-if="!product.fechaEliminacion"
+              v-if="!product.fechaEliminacion && canManageProducts"
               @click="deleteProduct(product.id)"
               class="btn-delete"
               title="Eliminar"
@@ -157,10 +157,15 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useAdminStore } from '../../stores/admin'
+import { useAuthStore } from '../../stores/auth'
 import api from '../../services/api'
 import type { Product } from '../../types'
 
 const adminStore = useAdminStore()
+const authStore = useAuthStore()
+
+const canManageProducts = computed(() => authStore.isAdmin)
+const canUpdateStock = computed(() => authStore.isAdmin || authStore.isCajero)
 
 onMounted(() => {
   adminStore.fetchProducts()
@@ -278,9 +283,7 @@ const saveStock = async () => {
   if (!editingStockProduct.value) return
 
   try {
-    await adminStore.updateProduct(editingStockProduct.value.id, {
-      stock: newStock.value,
-    })
+    await adminStore.updateProductStock(editingStockProduct.value.id, newStock.value)
     closeStockModal()
   } catch (err: any) {
     console.error('Error actualizando stock:', err)

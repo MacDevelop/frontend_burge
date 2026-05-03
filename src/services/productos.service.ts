@@ -38,6 +38,11 @@ export const productosService = {
     return response.data
   },
 
+  async updateStock(id: number, stock: number): Promise<Product> {
+    const response = await api.patch(`/productos/${id}/stock`, { stock })
+    return response.data
+  },
+
   async delete(id: number): Promise<void> {
     await api.delete(`/productos/${id}`)
   },
