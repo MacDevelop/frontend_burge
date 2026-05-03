@@ -3,7 +3,7 @@ import type { Sale, SaleDetail, SalesReport } from '../types'
 
 export interface CreateSaleDto {
   idUsuario: number
-  metodoPago: 'efectivo' | 'tarjeta' | 'transferencia' | 'qr'
+  metodoPago: 'efectivo' | 'tarjeta' | 'transferencia' | 'qr' | 'cotización' | 'otro'
   detalles: Array<{
     idProducto: number
     cantidad: number

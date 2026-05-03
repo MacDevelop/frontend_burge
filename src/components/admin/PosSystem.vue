@@ -92,9 +92,13 @@
           placeholder="Monto pagado"
           class="customer-input"
           step="0.01"
+          v-if="adminStore.currentSale.metodoPago !== 'qr'"
         />
+        <div v-if="adminStore.currentSale.metodoPago === 'qr'" class="qr-info">
+          Pago por QR: Se asume monto completo pagado
+        </div>
         <div
-          v-if="adminStore.currentSale.montoPagado > 0"
+          v-if="adminStore.currentSale.montoPagado > 0 && adminStore.currentSale.metodoPago !== 'qr'"
           class="cambio-info"
           :class="{ insufficient: cambio < 0 }"
         >
@@ -155,6 +159,10 @@ const updateCartQuantity = (index: number, cantidad: number) => {
 }
 
 const createSale = () => {
+  // Para pago por QR, asumir que el monto pagado es el total
+  if (adminStore.currentSale.metodoPago === 'qr') {
+    adminStore.currentSale.montoPagado = adminStore.cartTotal
+  }
   adminStore.createSale(authStore.user?.id || 1)
 }
 </script>
@@ -417,9 +425,13 @@ const createSale = () => {
   font-weight: bold;
 }
 
-.cambio-info.insufficient {
-  background: #dc262620;
-  color: #dc2626;
+.qr-info {
+  text-align: center;
+  padding: 0.8rem;
+  background: #22c55e20;
+  color: #22c55e;
+  border-radius: 40px;
+  font-weight: bold;
 }
 
 .btn-finalizar {
